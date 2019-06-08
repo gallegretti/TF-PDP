@@ -20,7 +20,7 @@ class Simulation
 {
 public:
 
-	Simulation(size_t n);
+	Simulation(size_t n, int seed);
 
 	// Each entity
 	//  Decide movement, update velocity and position
@@ -45,9 +45,8 @@ public:
 
 	void step(float delta);
 
-	// std::vector<Entity> entities;
-
 	std::vector<bool> is_alive;
+	// The map is centered at (0, 0)
 	std::vector<vec2f> positions;
 	std::vector<vec2f> velocities;
 	std::vector<float> mass;
@@ -57,4 +56,6 @@ public:
 	static constexpr float map_size = 1024;
 
 	static constexpr float maximum_velocity = 1.0f;
+
+	static constexpr float maximum_size = 10.0f;
 };

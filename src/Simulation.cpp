@@ -1,7 +1,25 @@
 #include "Simulation.h"
 
-Simulation::Simulation(size_t n)
+Simulation::Simulation(size_t n, int seed)
 {
+	std::default_random_engine generator;
+	generator.seed(seed);
+	
+	std::uniform_real_distribution<float> map_distribution(
+		-map_size + maximum_size,
+		map_size - maximum_size
+	);
+
+	std::uniform_real_distribution<float> size_distribution(
+		5.0f,
+		10.5f
+	);
+
+	std::uniform_real_distribution<float> mass_distribution(
+		5.0f,
+		10.5f
+	);
+
 	is_alive.reserve(n);
 	positions.reserve(n);
 	velocities.reserve(n);
@@ -11,11 +29,10 @@ Simulation::Simulation(size_t n)
 	for (size_t i = 0; i < n; i++)
 	{
 		is_alive.push_back(true);
-		// TODO: Random distribution
-		positions.push_back(vec2f(0.0f, 0.0f));
+		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
 		velocities.push_back(vec2f(0.0f, 0.0f));
-		mass.push_back(10.0f);
-		sizes.push_back(10.0f);
+		mass.push_back(mass_distribution(generator));
+		sizes.push_back(size_distribution(generator));
 	}
 }
 

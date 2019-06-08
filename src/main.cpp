@@ -10,16 +10,18 @@
 
 // TODO: Pass as args
 // --headless
+// --seed
 // --threads
 int main(int argc, char* argv[])
 {
+	int seed = 123456789;
 	// Initialize profiller
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
 
 	sf::Window window(sf::VideoMode(800, 600), "My window");
 	
-	Simulation simulation(1024);
+	Simulation simulation(1024, seed);
 
 	while (window.isOpen())
 	{
