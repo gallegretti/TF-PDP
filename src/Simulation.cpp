@@ -1,5 +1,24 @@
 #include "Simulation.h"
 
+Simulation::Simulation(size_t n)
+{
+	is_alive.reserve(n);
+	positions.reserve(n);
+	velocities.reserve(n);
+	mass.reserve(n);
+	sizes.reserve(n);
+
+	for (size_t i = 0; i < n; i++)
+	{
+		is_alive.push_back(true);
+		// TODO: Random distribution
+		positions.push_back(vec2f(0.0f, 0.0f));
+		velocities.push_back(vec2f(0.0f, 0.0f));
+		mass.push_back(10.0f);
+		sizes.push_back(10.0f);
+	}
+}
+
 void Simulation::step(float delta)
 {
 	// 1: Update position
@@ -18,7 +37,7 @@ void Simulation::step(float delta)
 		}
 
 		// TODO: Decide direction
-		vec2f acceleration;
+		vec2f acceleration = vec2f(1.0f, 1.0f);
 
 		// Update velocity
 		velocity.x += acceleration.x * delta;
@@ -37,6 +56,5 @@ void Simulation::step(float delta)
 		// Update position
 		position.x += acceleration.x * delta;
 		position.y += acceleration.y * delta;
-
 	}
 }

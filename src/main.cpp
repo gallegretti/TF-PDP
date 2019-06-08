@@ -8,7 +8,9 @@
 
 #include "Simulation.h"
 
-
+// TODO: Pass as args
+// --headless
+// --threads
 int main(int argc, char* argv[])
 {
 	// Initialize profiller
@@ -17,7 +19,7 @@ int main(int argc, char* argv[])
 
 	sf::Window window(sf::VideoMode(800, 600), "My window");
 	
-	Simulation simulation;
+	Simulation simulation(1024);
 
 	while (window.isOpen())
 	{
@@ -29,6 +31,9 @@ int main(int argc, char* argv[])
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
+
+		simulation.step(1.0f);
+
 	}
 
 	// Destroy the main instance of Remotery.

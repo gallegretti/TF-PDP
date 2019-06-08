@@ -118,11 +118,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Simulation.cpp" />
     <ClCompile Include="src\ThirdParty\remotery\Remotery.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Profiler.h" />
+    <ClInclude Include="src\Simulation.h" />
     <ClInclude Include="src\ThirdParty\remotery\Remotery.h" />
     <ClInclude Include="src\ThirdParty\SFML\SFML\Audio.hpp" />
     <ClInclude Include="src\ThirdParty\SFML\SFML\Audio\AlResource.hpp" />

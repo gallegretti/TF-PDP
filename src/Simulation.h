@@ -1,14 +1,12 @@
 #pragma once
+#include <random>
 #include <vector>
 
-struct Entity {
-	int id;
-	vec2f position;
-	vec2f velocity;
-	float size;
-};
-
 struct vec2f {
+	vec2f() = default;
+	vec2f(float x, float y) : x(x), y(y)
+	{
+	}
 	float x;
 	float y;
 };
@@ -21,6 +19,8 @@ struct EntityActionResult {
 class Simulation
 {
 public:
+
+	Simulation(size_t n);
 
 	// Each entity
 	//  Decide movement, update velocity and position
