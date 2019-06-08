@@ -1,7 +1,8 @@
 #include "Simulation.h"
 
-Simulation::Simulation(size_t n, int seed)
+Simulation::Simulation(size_t n, int n_iterations, int seed)
 {
+	this->n_iterations = n_iterations;
 	std::default_random_engine generator;
 	generator.seed(seed);
 	
@@ -33,6 +34,14 @@ Simulation::Simulation(size_t n, int seed)
 		velocities.push_back(vec2f(0.0f, 0.0f));
 		mass.push_back(mass_distribution(generator));
 		sizes.push_back(size_distribution(generator));
+	}
+}
+
+void Simulation::run()
+{
+	for (int i = 0; i < n_iterations; i++)
+	{
+		step(0.1f);
 	}
 }
 

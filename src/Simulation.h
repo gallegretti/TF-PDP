@@ -20,7 +20,7 @@ class Simulation
 {
 public:
 
-	Simulation(size_t n, int seed);
+	Simulation(size_t n, int n_iterations, int seed);
 
 	// Each entity
 	//  Decide movement, update velocity and position
@@ -43,6 +43,8 @@ public:
     -Atualização de colisões, reprodução e alimentação
 	*/
 
+	void run();
+
 	void step(float delta);
 
 	std::vector<bool> is_alive;
@@ -52,6 +54,7 @@ public:
 	std::vector<float> mass;
 	std::vector<float> sizes;
 
+	int n_iterations;
 
 	static constexpr float map_size = 1024;
 

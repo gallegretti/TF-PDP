@@ -120,6 +120,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Simulation.cpp" />
     <ClCompile Include="src\ThirdParty\remotery\Remotery.c" />
+    <ClCompile Include="src\Visualization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -224,6 +225,7 @@
     <ClInclude Include="src\ThirdParty\SFML\SFML\Window\Window.hpp" />
     <ClInclude Include="src\ThirdParty\SFML\SFML\Window\WindowHandle.hpp" />
     <ClInclude Include="src\ThirdParty\SFML\SFML\Window\WindowStyle.hpp" />
+    <ClInclude Include="src\Visualization.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdParty\SFML\SFML\Audio\SoundFileFactory.inl" />

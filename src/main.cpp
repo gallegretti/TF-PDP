@@ -1,45 +1,34 @@
-// Logging
-//#include "ThirdParty/easylogging/easylogging/easylogging++.h"
-//INITIALIZE_EASYLOGGINGPP
-#include <SFML/Window.hpp>
-
 // Profiler
 #include "ThirdParty/remotery/Remotery.h"
 
+#include "Visualization.h"
 #include "Simulation.h"
 
 // TODO: Pass as args
 // --headless
 // --seed
 // --threads
+// --iterations
 int main(int argc, char* argv[])
 {
 	int seed = 123456789;
+	bool has_visualization = true;
 	// Initialize profiller
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
 
-	sf::Window window(sf::VideoMode(800, 600), "My window");
-	
-	Simulation simulation(1024, seed);
+	// Start simulation
+	Simulation simulation(1024, 10000000, seed);
+	simulation.run();
 
-	while (window.isOpen())
+	// Start visualization
+	if (has_visualization)
 	{
-		// check all the window's events that were triggered since the last iteration of the loop
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			// "close requested" event: we close the window
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
-
-		simulation.step(1.0f);
-
+		Visualization visualization(&simulation);
+		visualization.run();
 	}
 
 	// Destroy the main instance of Remotery.
 	rmt_DestroyGlobalInstance(rmt);
-	//LOG(INFO) << "Successful shutdown";
 	return 0;
 }
