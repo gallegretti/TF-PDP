@@ -1,4 +1,5 @@
 #pragma once
+#include <condition_variable>
 #include <random>
 #include <vector>
 
@@ -6,6 +7,9 @@ struct vec2f {
 	vec2f() = default;
 	vec2f(float x, float y) : x(x), y(y)
 	{
+	}
+	float length() {
+		return sqrt((x * x) + (y * y));
 	}
 	float x;
 	float y;
@@ -28,6 +32,8 @@ public:
 	//  If size > x, divide
 
 	EntityActionResult update_entity();
+
+	std::mutex rendering;
 
 	/*
 	Sobre a simulação:

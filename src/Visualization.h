@@ -1,5 +1,6 @@
 #pragma once
-#include <SFML/Window.hpp>
+#include <thread>
+#include <SFML/Graphics.hpp>
 #include "Simulation.h"
 
 class Visualization
@@ -10,6 +11,10 @@ public:
 
 	void run();
 
+	void render_visualization();
+
 private:
 	Simulation* simulation;
+
+	sf::RenderWindow window;
 };
