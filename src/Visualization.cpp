@@ -4,33 +4,56 @@ Visualization::Visualization(Simulation* simulation) :
 	simulation(simulation),
 	window(sf::RenderWindow(sf::VideoMode(800, 600), "PALS"))
 {
+	_rmt_SetCurrentThreadName("Visualization");
 }
 
 void Visualization::run()
 {
+	rmt_ScopedCPUSample(Visualization, 0);
+	sf::Clock last_frame;
 	while (window.isOpen())
 	{
-		// check all the window's events that were triggered since the last iteration of the loop
+		rmt_ScopedCPUSample(Visualization_Loop, 0);
 		sf::Event event;
-		while (window.pollEvent(event))
+		while (true)
 		{
-			// "close requested" event: we close the window
-			if (event.type == sf::Event::Closed)
+			while (window.pollEvent(event))
 			{
-				window.close();
+				if (event.type == sf::Event::Closed)
+				{
+					window.close();
+					return;
+				}
+			}
+			// Keep the window responsive while waiting for
+			// the time to draw the next frame
+			if (last_frame.getElapsedTime().asMilliseconds() > 100)
+			{
+				break;
 			}
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		
+		LOG(INFO) << "Visualization waiting for lock";
 
+		// Critical region
 		simulation->rendering.lock();
+		LOG(INFO) << "Visualization got lock";
+		// Wait to clear after getting a lock, so the screen always has the last frame
+		window.clear();
 		render_visualization();
 		simulation->rendering.unlock();
+		// End of critical region
+
+		LOG(INFO) << "Visualization released lock";
+		window.display();
+		last_frame.restart();
 	}
 }
 
 void Visualization::render_visualization()
 {
+	rmt_ScopedCPUSample(Visualization_Rendering, 0);
 	sf::CircleShape circle;
 	for (int i = 0; i < simulation->positions.size(); i++)
 	{

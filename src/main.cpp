@@ -1,5 +1,8 @@
 #include <thread>
+#include <optional>
 #include "ThirdParty/remotery/Remotery.h"
+#include "ThirdParty/easylogging/easylogging/easylogging++.h"
+INITIALIZE_EASYLOGGINGPP
 #include "Visualization.h"
 #include "Simulation.h"
 
@@ -12,21 +15,26 @@ int main(int argc, char* argv[])
 {
 	int seed = 123456789;
 	bool has_visualization = true;
-	int iterations = 1000000;
+	int iterations = 10000000;
+	
+	LOG(INFO) << "Started";
 	// Initialize profiller
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
+	_rmt_SetCurrentThreadName("Main");
 
 	// Start simulation
 	Simulation simulation(1024, iterations, seed);
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});
+	// simulation_thread.detach();
 
 	// Start visualization
+	std::optional<std::thread> visualization;
 	if (has_visualization)
 	{
-		std::thread([&]() {
+		visualization = std::thread([&]() {
 			Visualization visualization(&simulation);
 			visualization.run();
 		});

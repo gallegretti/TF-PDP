@@ -5,6 +5,7 @@
     <ClCompile Include="src\ThirdParty\remotery\Remotery.c" />
     <ClCompile Include="src\Simulation.cpp" />
     <ClCompile Include="src\Visualization.cpp" />
+    <ClCompile Include="src\ThirdParty\easylogging\easylogging\easylogging++.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -110,6 +111,8 @@
     <ClInclude Include="src\ThirdParty\SFML\SFML\Window.hpp" />
     <ClInclude Include="src\Simulation.h" />
     <ClInclude Include="src\Visualization.h" />
+    <ClInclude Include="src\ThirdParty\easylogging\easylogging\easylogging++.h" />
+    <ClInclude Include="src\vec2f.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdParty\SFML\SFML\Audio\SoundFileFactory.inl" />

@@ -1,6 +1,8 @@
 #pragma once
+#include <Remotery.h>
 #include <thread>
 #include <SFML/Graphics.hpp>
+#include <easylogging/easylogging++.h>
 #include "Simulation.h"
 
 class Visualization

@@ -2,6 +2,7 @@
 
 Simulation::Simulation(size_t n, int n_iterations, int seed)
 {
+	_rmt_SetCurrentThreadName("Simulation");
 	this->n_iterations = n_iterations;
 	std::default_random_engine generator;
 	generator.seed(seed);
@@ -22,6 +23,7 @@ Simulation::Simulation(size_t n, int n_iterations, int seed)
 	);
 
 	is_alive.reserve(n);
+	accelerations.reserve(n);
 	positions.reserve(n);
 	velocities.reserve(n);
 	mass.reserve(n);
@@ -30,6 +32,7 @@ Simulation::Simulation(size_t n, int n_iterations, int seed)
 	for (size_t i = 0; i < n; i++)
 	{
 		is_alive.push_back(true);
+		accelerations.push_back(vec2f(0.1f, 0.1f));
 		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
 		velocities.push_back(vec2f(0.0f, 0.0f));
 		mass.push_back(mass_distribution(generator));
@@ -39,20 +42,47 @@ Simulation::Simulation(size_t n, int n_iterations, int seed)
 
 void Simulation::run()
 {
-	for (int i = 0; i < n_iterations; i++)
+	for (int i = 0; i < n_iterations / 128; i++)
 	{
-		step(0.1f);
+		// Only lock/unlock mutex every few simulation steps reduce the lock overhead
+		// TODO: Make mutex optional if headless
+		LOG(INFO) << "Simulation waiting for lock";
+		rendering.lock();
+		LOG(INFO) << "Simulation got lock";
+		for (int j = 0; j < 128; j++)
+		{
+			step(0.1f);
+		}
+		rendering.unlock();
+		LOG(INFO) << "Simulation released lock";
 	}
 }
 
 void Simulation::step(float delta)
 {
-	rendering.lock();
-	// 1: Update position
+	rmt_ScopedCPUSample(Simulation_Step, 0);
+
+	// 1: Decide acceleration vector
+	update_accelerations(delta);
+
+	// 2: Update positions and velocities
+	// based on new acceleration
+	update_positions(delta);
+}
+
+void Simulation::update_accelerations(float delta)
+{
+	// TODO: Code Parallel
+}
+
+void Simulation::update_positions(float delta)
+{
+	// TODO: Parallel
 	for (int i = 0; i < positions.size(); i++)
 	{
 		vec2f& position = positions[i];
 		vec2f& velocity = velocities[i];
+		vec2f& acceleration = accelerations[i];
 		// Handle map collision
 		if ((position.x < -map_size) || (position.x > map_size))
 		{
@@ -63,26 +93,23 @@ void Simulation::step(float delta)
 			velocity.y = 0.0f;
 		}
 
-		// TODO: Decide direction
-		vec2f acceleration = vec2f(1.0f, 1.0f);
-
 		// Update velocity
 		velocity.x += acceleration.x * delta;
 		velocity.y += acceleration.y * delta;
 
 		// Limit velocity
-		float current_velocity = velocity.length();
-		if (current_velocity > maximum_velocity)
+		float current_velocity = velocity.squared_length();
+		// Avoid calculating square root by comparing with squared maximum velocity
+		if (current_velocity > squared_maximum_velocity)
 		{
 			current_velocity = maximum_velocity;
 		}
 		float factor = 1.0 / current_velocity;
 		velocity.x *= factor;
 		velocity.y *= factor;
-		
+
 		// Update position
 		position.x += acceleration.x * delta;
 		position.y += acceleration.y * delta;
 	}
-	rendering.unlock();
 }

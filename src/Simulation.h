@@ -1,19 +1,10 @@
 #pragma once
-#include <condition_variable>
+#include <Remotery.h>
+#include <easylogging/easylogging++.h>
+#include <mutex>
 #include <random>
 #include <vector>
-
-struct vec2f {
-	vec2f() = default;
-	vec2f(float x, float y) : x(x), y(y)
-	{
-	}
-	float length() {
-		return sqrt((x * x) + (y * y));
-	}
-	float x;
-	float y;
-};
+#include "vec2f.h"
 
 struct EntityActionResult {
 	vec2f movement;
@@ -33,7 +24,10 @@ public:
 
 	EntityActionResult update_entity();
 
+	// ordered_lock rendering;
 	std::mutex rendering;
+
+	std::condition_variable cv;
 
 	/*
 	Sobre a simulação:
@@ -55,6 +49,7 @@ public:
 
 	std::vector<bool> is_alive;
 	// The map is centered at (0, 0)
+	std::vector<vec2f> accelerations;
 	std::vector<vec2f> positions;
 	std::vector<vec2f> velocities;
 	std::vector<float> mass;
@@ -66,5 +61,13 @@ public:
 
 	static constexpr float maximum_velocity = 1.0f;
 
+	static constexpr float squared_maximum_velocity = maximum_velocity * maximum_velocity;
+
 	static constexpr float maximum_size = 10.0f;
+
+private:
+
+	void update_accelerations(float delta);
+
+	void update_positions(float delta);
 };
