@@ -32,18 +32,20 @@ void Visualization::run()
 				break;
 			}
 		}
-
 		
 		LOG(INFO) << "Visualization waiting for lock";
-
 		// Critical region
-		simulation->rendering.lock();
-		LOG(INFO) << "Visualization got lock";
-		// Wait to clear after getting a lock, so the screen always has the last frame
-		window.clear();
-		render_visualization();
-		simulation->rendering.unlock();
-		// End of critical region
+		{
+			std::scoped_lock lock(simulation->rendering);
+			LOG(INFO) << "Visualization got lock";
+			if (simulation->is_done)
+			{
+				return;
+			}
+			// Wait to clear after getting a lock, so the screen always has the last frame
+			window.clear();
+			render_visualization();
+		}
 
 		LOG(INFO) << "Visualization released lock";
 		window.display();
@@ -57,8 +59,8 @@ void Visualization::render_visualization()
 	sf::CircleShape circle;
 	for (int i = 0; i < simulation->positions.size(); i++)
 	{
-		vec2f& agent_position = simulation->positions[i];
-		float agent_size = simulation->sizes[i];
+		const vec2f& agent_position = simulation->positions[i];
+		const float& agent_size = simulation->sizes[i];
 		circle.setPosition({ agent_position.x, agent_position.y });
 		// TODO: Change color per agent
 		circle.setFillColor(sf::Color::Blue);

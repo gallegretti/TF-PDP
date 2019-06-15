@@ -56,18 +56,26 @@ void Simulation::run()
 		rendering.unlock();
 		LOG(INFO) << "Simulation released lock";
 	}
+	is_done = true;
 }
 
 void Simulation::step(float delta)
 {
 	rmt_ScopedCPUSample(Simulation_Step, 0);
 
-	// 1: Decide acceleration vector
+	// 1: Decide acceleration vector based on 
+	// current position and surroundings
 	update_accelerations(delta);
 
-	// 2: Update positions and velocities
+	// "Barrier"
+
+	// 2: Update position and velocity
 	// based on new acceleration
 	update_positions(delta);
+
+	// "Barrier"
+
+	// TODO:
 }
 
 void Simulation::update_accelerations(float delta)
@@ -102,11 +110,10 @@ void Simulation::update_positions(float delta)
 		// Avoid calculating square root by comparing with squared maximum velocity
 		if (current_velocity > squared_maximum_velocity)
 		{
-			current_velocity = maximum_velocity;
+			float factor = 1.0 / maximum_velocity;
+			velocity.x *= factor;
+			velocity.y *= factor;
 		}
-		float factor = 1.0 / current_velocity;
-		velocity.x *= factor;
-		velocity.y *= factor;
 
 		// Update position
 		position.x += acceleration.x * delta;

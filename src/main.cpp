@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
 	int seed = 123456789;
 	bool has_visualization = true;
-	int iterations = 10000000;
+	int iterations = 1000000;
 	
 	LOG(INFO) << "Started";
 	// Initialize profiller
@@ -28,7 +28,6 @@ int main(int argc, char* argv[])
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});
-	// simulation_thread.detach();
 
 	// Start visualization
 	std::optional<std::thread> visualization;
@@ -42,6 +41,10 @@ int main(int argc, char* argv[])
 
 	// Wait for simulation to end
 	simulation_thread.join();
+	if (visualization.has_value())
+	{
+		visualization->join();
+	}
 
 	// Destroy the main instance of Remotery.
 	rmt_DestroyGlobalInstance(rmt);

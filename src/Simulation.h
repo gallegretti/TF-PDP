@@ -17,14 +17,7 @@ public:
 
 	Simulation(size_t n, int n_iterations, int seed);
 
-	// Each entity
-	//  Decide movement, update velocity and position
-	// Each entity
-	//  If size > x, divide
-
-	EntityActionResult update_entity();
-
-	// ordered_lock rendering;
+	// Lock used by the visualization thread
 	std::mutex rendering;
 
 	std::condition_variable cv;
@@ -56,6 +49,8 @@ public:
 	std::vector<float> sizes;
 
 	int n_iterations;
+
+	bool is_done = false;
 
 	static constexpr float map_size = 1024;
 

@@ -10,6 +10,11 @@ struct vec2f {
 	float squared_length() {
 		return (x * x) + (y * y);
 	}
+	void normalize() {
+		float factor = 1 / length();
+		x *= factor;
+		y *= factor;
+	}
 	float x;
 	float y;
 };
