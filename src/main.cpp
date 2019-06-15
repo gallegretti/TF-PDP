@@ -5,33 +5,28 @@
 INITIALIZE_EASYLOGGINGPP
 #include "Visualization.h"
 #include "Simulation.h"
+#include "Settings.h"
 
-// TODO: Pass as args
-// --headless
-// --seed
-// --threads
-// --iterations
 int main(int argc, char* argv[])
 {
-	int seed = 123456789;
-	bool has_visualization = true;
-	int iterations = 1000000;
-	
+	// Initialize
 	LOG(INFO) << "Started";
-	// Initialize profiller
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
 	_rmt_SetCurrentThreadName("Main");
 
+	// Read args
+	Settings settings(argc, argv);
+
 	// Start simulation
-	Simulation simulation(1024, iterations, seed);
+	Simulation simulation(1024, settings.n_iterations, settings.seed);
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});
 
 	// Start visualization
 	std::optional<std::thread> visualization;
-	if (has_visualization)
+	if (!settings.is_headless)
 	{
 		visualization = std::thread([&]() {
 			Visualization visualization(&simulation);

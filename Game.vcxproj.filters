@@ -113,6 +113,8 @@
     <ClInclude Include="src\Visualization.h" />
     <ClInclude Include="src\ThirdParty\easylogging\easylogging\easylogging++.h" />
     <ClInclude Include="src\vec2f.h" />
+    <ClInclude Include="src\Settings.h" />
+    <ClInclude Include="src\ThirdParty\args\args.hxx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdParty\SFML\SFML\Audio\SoundFileFactory.inl" />

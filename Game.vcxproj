@@ -127,7 +127,9 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\Profiler.h" />
+    <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\Simulation.h" />
+    <ClInclude Include="src\ThirdParty\args\args.hxx" />
     <ClInclude Include="src\ThirdParty\easylogging\easylogging\easylogging++.h" />
     <ClInclude Include="src\ThirdParty\remotery\Remotery.h" />
     <ClInclude Include="src\ThirdParty\SFML\SFML\Audio.hpp" />
