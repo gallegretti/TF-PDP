@@ -7,13 +7,12 @@
 #include <atomic>
 #include "vec2f.h"
 
-
+// Possible states for each agent
 enum class State {
-	Incubating,
-	Splitting,
-	Hunting,
-	Dead,
-	Empty
+	Incubating,	// Standing still and gaining mass
+	Splitting,	// Splitting itself in two, each with half of it's mass
+	Hunting,	// Moving, trying to absorb other agents, spending mass
+	Dead		// Dead
 };
 
 struct EntityActionResult {
@@ -34,16 +33,16 @@ public:
 
 	/*
 	Sobre a simulação:
-    -Os organismos vivem em um ambiente finito de duas dimensões
-    -Um organismo pode se alimentar de outro, caso seja maior e esteja sobre o outro
-    -Um organismo pode se alimentar de nutrientes (aparecem aleatoriamente no ambiente)
-    -Após atingir certo tamanho, um organismo de divide em dois
-    -Com o passar do tempo, organismos gastam energia e perdem tamanho
-    -Um organismo pode se mover em qualquer direção
-    Sobre a paralelização:
-    -Os organismos vão tomar ações, atualizar suas posições e velocidades ao mesmo tempo.
-    -Barreira de sincronização
-    -Atualização de colisões, reprodução e alimentação
+	-Os organismos vivem em um ambiente finito de duas dimensões
+	-Um organismo pode se alimentar de outro, caso seja maior e esteja sobre o outro
+	-Um organismo pode se alimentar de nutrientes (aparecem aleatoriamente no ambiente)
+	-Após atingir certo tamanho, um organismo de divide em dois
+	-Com o passar do tempo, organismos gastam energia e perdem tamanho
+	-Um organismo pode se mover em qualquer direção
+	Sobre a paralelização:
+	-Os organismos vão tomar ações, atualizar suas posições e velocidades ao mesmo tempo.
+	-Barreira de sincronização
+	-Atualização de colisões, reprodução e alimentação
 	*/
 
 	void run();
@@ -79,11 +78,11 @@ public:
 
 private:
 
+	void respawn_agents(float delta);
+
 	void update_states(float delta);
 
-	void think_actions(float delta);
-
-	void update_accelerations(float delta);
-
 	void update_positions(float delta);
+
+	void update_collisions(float delta);
 };
