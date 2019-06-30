@@ -18,16 +18,14 @@ Simulation::Simulation(size_t n, int n_iterations, int seed) :
 		1.0f
 	);
 
-	accelerations.reserve(n);
+	movements.reserve(n);
 	positions.reserve(n);
-	velocities.reserve(n);
 	mass.reserve(n);
 
 	for (size_t i = 0; i < n; i++)
 	{
-		accelerations.push_back(vec2f(0.1f, 0.1f));
+		movements.push_back(vec2f(0.1f, 0.1f));
 		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
-		velocities.push_back(vec2f(0.0f, 0.0f));
 		mass.push_back(mass_distribution(generator));
 		states[i].store(State::Incubating);
 	}
@@ -69,8 +67,7 @@ void Simulation::step(float delta)
 
 	// "Barrier"
 
-	// 2: Update position and velocity
-	// based on new acceleration
+	// 2: Update position based on movement
 	update_positions(delta);
 
 	// "Barrier"
@@ -119,6 +116,7 @@ void Simulation::update_states(float delta)
 		switch (states[i].load())
 		{
 		case State::Incubating:
+			movements[i] = vec2f(0.0f, 0.0f);
 			mass[i] += mass_cost;
 			break;
 
@@ -146,35 +144,29 @@ void Simulation::update_positions(float delta)
 	for (int i = 0; i < positions.size(); i++)
 	{
 		vec2f& position = positions[i];
-		vec2f& velocity = velocities[i];
-		vec2f& acceleration = accelerations[i];
-		// Handle map collision
-		if ((position.x < -map_size) || (position.x > map_size))
-		{
-			velocity.x = 0.0f;
-		}
-		if ((position.y < -map_size) || (position.y > map_size))
-		{
-			velocity.y = 0.0f;
-		}
-
-		// Update velocity
-		velocity.x += acceleration.x * delta;
-		velocity.y += acceleration.y * delta;
-
-		// Limit velocity
-		float current_velocity = velocity.squared_length();
-		// Avoid calculating square root by comparing with squared maximum velocity
-		if (current_velocity > squared_maximum_velocity)
-		{
-			float factor = 1.0 / maximum_velocity;
-			velocity.x *= factor;
-			velocity.y *= factor;
-		}
+		vec2f& movement = movements[i];
 
 		// Update position
-		position.x += acceleration.x * delta;
-		position.y += acceleration.y * delta;
+		position.x += movement.x * delta;
+		position.y += movement.y * delta;
+
+		// Map collision
+		if (position.x < -map_size)
+		{
+			position.x = -map_size;
+		}
+		if (position.x > map_size)
+		{
+			position.x = map_size;
+		}
+		if (position.y < -map_size)
+		{
+			position.y = -map_size;
+		}
+		if (position.y > map_size)
+		{
+			position.y = map_size;
+		}
 	}
 }
 

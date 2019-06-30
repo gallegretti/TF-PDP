@@ -50,9 +50,8 @@ public:
 	void step(float delta);
 
 	// The map is centered at (0, 0)
-	std::vector<vec2f> accelerations;
+	std::vector<vec2f> movements;
 	std::vector<vec2f> positions;
-	std::vector<vec2f> velocities;
 	std::vector<float> mass;
 	std::vector<std::atomic<State>> states;
 
