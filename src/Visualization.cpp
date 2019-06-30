@@ -1,6 +1,6 @@
 #include "Visualization.h"
 
-Visualization::Visualization(Simulation* simulation) : 
+Visualization::Visualization(Simulation* simulation) :
 	simulation(simulation),
 	window(sf::RenderWindow(sf::VideoMode(800, 600), "PALS"))
 {
@@ -32,7 +32,7 @@ void Visualization::run()
 				break;
 			}
 		}
-		
+
 		LOG(INFO) << "Visualization waiting for lock";
 		// Critical region
 		{
@@ -60,7 +60,7 @@ void Visualization::render_visualization()
 	for (int i = 0; i < simulation->positions.size(); i++)
 	{
 		const vec2f& agent_position = simulation->positions[i];
-		const float& agent_size = simulation->sizes[i];
+		const float& agent_size = simulation->mass[i];
 		circle.setPosition({ agent_position.x, agent_position.y });
 		// TODO: Change color per agent
 		circle.setFillColor(sf::Color::Blue);

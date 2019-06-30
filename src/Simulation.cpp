@@ -1,42 +1,40 @@
 #include "Simulation.h"
 
-Simulation::Simulation(size_t n, int n_iterations, int seed)
+Simulation::Simulation(size_t n, int n_iterations, int seed) :
+	states(std::vector<std::atomic<State>>(maximum_agents))
 {
 	_rmt_SetCurrentThreadName("Simulation");
 	this->n_iterations = n_iterations;
 	std::default_random_engine generator;
 	generator.seed(seed);
-	
-	std::uniform_real_distribution<float> map_distribution(
-		-map_size + maximum_size,
-		map_size - maximum_size
-	);
 
-	std::uniform_real_distribution<float> size_distribution(
-		5.0f,
-		10.5f
+	std::uniform_real_distribution<float> map_distribution(
+		-map_size + splitting_mass,
+		map_size - splitting_mass
 	);
 
 	std::uniform_real_distribution<float> mass_distribution(
-		5.0f,
-		10.5f
+		0.1f,
+		1.0f
 	);
 
-	is_alive.reserve(n);
 	accelerations.reserve(n);
 	positions.reserve(n);
 	velocities.reserve(n);
 	mass.reserve(n);
-	sizes.reserve(n);
 
 	for (size_t i = 0; i < n; i++)
 	{
-		is_alive.push_back(true);
 		accelerations.push_back(vec2f(0.1f, 0.1f));
 		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
 		velocities.push_back(vec2f(0.0f, 0.0f));
 		mass.push_back(mass_distribution(generator));
-		sizes.push_back(size_distribution(generator));
+		states[i].store(State::Incubating);
+	}
+
+	for (size_t i = n; i < maximum_agents; i++)
+	{
+		states[i].store(State::Empty);
 	}
 }
 
@@ -63,9 +61,12 @@ void Simulation::step(float delta)
 {
 	rmt_ScopedCPUSample(Simulation_Step, 0);
 
-	// 1: Decide acceleration vector based on 
+	// 0: Update state based on current status
+	update_states(delta);
+
+	// 1: Think next action based on
 	// current position and surroundings
-	update_accelerations(delta);
+	think_actions(delta);
 
 	// "Barrier"
 
@@ -76,6 +77,60 @@ void Simulation::step(float delta)
 	// "Barrier"
 
 	// TODO:
+}
+
+void Simulation::update_states(float delta)
+{
+	for (int i = 0; i < positions.size(); i++)
+	{
+		switch (states[i].load())
+		{
+			case State::Incubating:
+				if (mass[i] >= hunting_mass)
+					states[i].store(State::Hunting);
+				break;
+			case State::Hunting:
+				if (mass[i] <= incubating_mass)
+					states[i].store(State::Incubating);
+				else if (mass[i] >= splitting_mass)
+					states[i].store(State::Splitting);
+				break;
+			case State::Splitting:
+				if (mass[i] >= hunting_mass)
+					states[i].store(State::Hunting);
+				else
+					states[i].store(State::Incubating);
+				break;
+			case State::Dead:
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void Simulation::think_actions(float delta)
+{
+	for (int i = 0; i < positions.size(); i++)
+	{
+		switch (states[i].load())
+		{
+		case State::Incubating:
+			mass[i] += mass_cost;
+			break;
+		case State::Hunting:
+			// Update acceleration / position / check collisions
+			mass[i] -= mass_cost;
+			break;
+		case State::Splitting:
+			// Spawn new agent
+			break;
+		case State::Dead:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void Simulation::update_accelerations(float delta)
