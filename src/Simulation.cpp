@@ -1,6 +1,6 @@
 #include "Simulation.h"
 
-Simulation::Simulation(size_t n, int n_iterations, int seed) :
+Simulation::Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed) :
 	states(std::vector<std::atomic<State>>(maximum_agents))
 {
 	_rmt_SetCurrentThreadName("Simulation");
@@ -18,11 +18,11 @@ Simulation::Simulation(size_t n, int n_iterations, int seed) :
 		1.0f
 	);
 
-	movements.reserve(n);
-	positions.reserve(n);
-	mass.reserve(n);
+	movements.reserve(start_n_agents);
+	positions.reserve(start_n_agents);
+	mass.reserve(start_n_agents);
 
-	for (size_t i = 0; i < n; i++)
+	for (size_t i = 0; i < start_n_agents; i++)
 	{
 		movements.push_back(vec2f(0.1f, 0.1f));
 		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
@@ -30,7 +30,7 @@ Simulation::Simulation(size_t n, int n_iterations, int seed) :
 		states[i].store(State::Incubating);
 	}
 
-	for (size_t i = n; i < maximum_agents; i++)
+	for (size_t i = start_n_agents; i < maximum_agents; i++)
 	{
 		states[i].store(State::Dead);
 	}
@@ -72,7 +72,7 @@ void Simulation::step(float delta)
 
 	// "Barrier"
 
-	// 3: Calculate collisions0
+	// 3: Calculate collisions
 	update_collisions(delta);
 }
 

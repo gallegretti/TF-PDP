@@ -24,7 +24,7 @@ class Simulation
 {
 public:
 
-	Simulation(size_t n, int n_iterations, int seed);
+	Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed);
 
 	// Lock used by the visualization thread
 	std::mutex rendering;
@@ -60,8 +60,6 @@ public:
 	bool is_done = false;
 
 	static constexpr float map_size = 1024;
-
-	static constexpr int maximum_agents = 100000;
 
 	static constexpr float maximum_velocity = 1.0f;
 

@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	Settings settings(argc, argv);
 
 	// Start simulation
-	Simulation simulation(1024, settings.n_iterations, settings.seed);
+	Simulation simulation(settings.n_start_agents, settings.n_maximum_agents, settings.n_iterations, settings.seed);
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});
@@ -43,5 +43,6 @@ int main(int argc, char* argv[])
 
 	// Destroy the main instance of Remotery.
 	rmt_DestroyGlobalInstance(rmt);
+	LOG(INFO) << "Finished";
 	return 0;
 }
