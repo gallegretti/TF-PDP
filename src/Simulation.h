@@ -1,11 +1,12 @@
 #pragma once
-#include <Remotery.h>
 #include <easylogging/easylogging++.h>
 #include <mutex>
 #include <random>
 #include <vector>
 #include <atomic>
+#include "SpatialIndex.h"
 #include "vec2f.h"
+#include "Settings.h"
 
 /*
 	PALS
@@ -49,7 +50,7 @@ public:
 
 	// Constructor, takes starting number of agents, maximum number of agents,
 	// number of iterations, random seed and a flag enabling rendering.
-	Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed, bool has_visualization);
+	Simulation(Settings simulation_settings);
 
 	// Lock used by the visualization thread
 	std::mutex rendering;
@@ -69,6 +70,9 @@ public:
 	std::vector<float> masses;				// Mass data.
 	std::vector<std::atomic<State>> states;	// States data.
 
+	// Numebr of threads the simulation will use
+	size_t n_threads;
+
 	// Number of iterations the simulation will run for.
 	int n_iterations;
 
@@ -79,6 +83,7 @@ public:
 	bool is_done = false;
 
 	// Constant map dimension size.
+	// Map goes from [-map_size, +map_size]
 	static constexpr float map_size = 1024;
 
 	// Threshold for an agent go back to incubating state.
@@ -94,6 +99,9 @@ public:
 	static constexpr float mass_cost = 0.1f;
 
 private:
+
+	// Spatial index for efficient position-based lookups
+	SpatialIndex spatial_index;
 
 	// Respawn a constant amount of dead agents.
 	void respawn_agents(float delta);

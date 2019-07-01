@@ -1,11 +1,15 @@
 #include "Simulation.h"
 
-Simulation::Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed, bool has_visualization) :
-	states(std::vector<std::atomic<State>>(maximum_agents)), n_iterations(n_iterations), has_visualization(has_visualization)
+// size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed, bool has_visualization
+Simulation::Simulation(Settings settings) :
+	states(std::vector<std::atomic<State>>(settings.n_maximum_agents)),
+	n_iterations(settings.n_iterations),
+	has_visualization(!settings.is_headless),
+	n_threads(settings.n_threads),
+	spatial_index(map_size)
 {
-	_rmt_SetCurrentThreadName("Simulation");
 	std::default_random_engine generator;
-	generator.seed(seed);
+	generator.seed(settings.seed);
 
 	std::uniform_real_distribution<float> map_distribution(
 		-map_size + splitting_mass,
@@ -17,21 +21,23 @@ Simulation::Simulation(size_t start_n_agents, size_t maximum_agents, int n_itera
 		1.0f
 	);
 
-	movements.reserve(start_n_agents);
-	positions.reserve(start_n_agents);
-	masses.reserve(start_n_agents);
+	movements.reserve(settings.n_start_agents);
+	positions.reserve(settings.n_start_agents);
+	masses.reserve(settings.n_start_agents);
 
-	for (size_t i = 0; i < start_n_agents; i++)
+	for (size_t i = 0; i < settings.n_start_agents; i++)
 	{
+		vec2f position(map_distribution(generator), map_distribution(generator));
+		positions.push_back(position);
+		spatial_index.set(i, position);
 		movements.push_back(vec2f(0.1f, 0.1f));
-		positions.push_back(vec2f(map_distribution(generator), map_distribution(generator)));
 		masses.push_back(mass_distribution(generator));
 		states[i].store(State::Incubating);
 	}
 
-	last_agent_index = start_n_agents;
+	last_agent_index = settings.n_start_agents;
 
-	for (size_t i = start_n_agents; i < maximum_agents; i++)
+	for (size_t i = settings.n_start_agents; i < settings.n_maximum_agents; i++)
 	{
 		movements.push_back(vec2f(0.0f, 0.0f));
 		positions.push_back(vec2f(0.0f, 0.0f));
@@ -66,8 +72,6 @@ void Simulation::run()
 
 void Simulation::step(float delta)
 {
-	rmt_ScopedCPUSample(Simulation_Step, 0);
-
 	// 0: Create new agents
 	respawn_agents(delta);
 
@@ -92,8 +96,7 @@ void Simulation::respawn_agents(float delta)
 
 void Simulation::update_states(float delta)
 {
-	rmt_ScopedCPUSample(update_states, 0);
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
 		switch (states[i].load())
@@ -157,12 +160,12 @@ void Simulation::update_states(float delta)
 
 void Simulation::update_positions(float delta)
 {
-	rmt_ScopedCPUSample(update_positions, 0);
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
 		vec2f& position = positions[i];
 		vec2f& movement = movements[i];
+		vec2f old_position = position;
 
 		// Update position
 		position.x += movement.x * delta;
@@ -185,6 +188,9 @@ void Simulation::update_positions(float delta)
 		{
 			position.y = map_size;
 		}
+
+		// Update index
+		spatial_index.moved(i, old_position, position);
 	}
 }
 

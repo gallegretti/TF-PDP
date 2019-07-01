@@ -4,16 +4,13 @@ Visualization::Visualization(Simulation* simulation) :
 	simulation(simulation),
 	window(sf::RenderWindow(sf::VideoMode(800, 600), "PALS"))
 {
-	_rmt_SetCurrentThreadName("Visualization");
 }
 
 void Visualization::run()
 {
-	rmt_ScopedCPUSample(Visualization, 0);
 	sf::Clock last_frame;
 	while (window.isOpen())
 	{
-		rmt_ScopedCPUSample(Visualization_Loop, 0);
 		sf::Event event;
 		while (true)
 		{
@@ -55,7 +52,6 @@ void Visualization::run()
 
 void Visualization::render_visualization()
 {
-	rmt_ScopedCPUSample(Visualization_Rendering, 0);
 	sf::CircleShape circle;
 	for (int i = 0; i < simulation->positions.size(); i++)
 	{

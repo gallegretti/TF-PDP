@@ -122,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Simulation.cpp" />
+    <ClCompile Include="src\SpatialIndex.cpp" />
     <ClCompile Include="src\ThirdParty\easylogging\easylogging\easylogging++.cc" />
     <ClCompile Include="src\ThirdParty\remotery\Remotery.c" />
     <ClCompile Include="src\Visualization.cpp" />
@@ -131,6 +132,7 @@
     <ClInclude Include="src\Profiler.h" />
     <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\Simulation.h" />
+    <ClInclude Include="src\SpatialIndex.h" />
     <ClInclude Include="src\ThirdParty\args\args.hxx" />
     <ClInclude Include="src\ThirdParty\easylogging\easylogging\easylogging++.h" />
     <ClInclude Include="src\ThirdParty\remotery\Remotery.h" />

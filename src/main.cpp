@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Start simulation
-	Simulation simulation(settings.n_start_agents, settings.n_maximum_agents, settings.n_iterations, settings.seed, !settings.is_headless);
+	Simulation simulation(settings);
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});

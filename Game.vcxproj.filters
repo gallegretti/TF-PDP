@@ -6,6 +6,7 @@
     <ClCompile Include="src\Simulation.cpp" />
     <ClCompile Include="src\Visualization.cpp" />
     <ClCompile Include="src\ThirdParty\easylogging\easylogging\easylogging++.cc" />
+    <ClCompile Include="src\SpatialIndex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -115,6 +116,7 @@
     <ClInclude Include="src\vec2f.h" />
     <ClInclude Include="src\Settings.h" />
     <ClInclude Include="src\ThirdParty\args\args.hxx" />
+    <ClInclude Include="src\SpatialIndex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ThirdParty\SFML\SFML\Audio\SoundFileFactory.inl" />
