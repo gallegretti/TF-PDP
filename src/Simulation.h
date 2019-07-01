@@ -69,6 +69,7 @@ public:
 	std::vector<vec2f> positions;			// Position data.
 	std::vector<float> masses;				// Mass data.
 	std::vector<std::atomic<State>> states;	// States data.
+	std::vector<vec2f> last_positions;
 
 	// Numebr of threads the simulation will use
 	size_t n_threads;
@@ -95,8 +96,11 @@ public:
 	// Threshold for an agent to split it self in two.
 	static constexpr float splitting_mass = 10.0f;
 
-	// Cost in mass for an agent to take an action.
-	static constexpr float mass_cost = 0.1f;
+	// Cost in mass for an agent to move.
+	static constexpr float move_mass_cost = 0.1f;
+
+	// Reward in mass for an agent to incubate
+	static constexpr float incubate_mass_reward = 0.1f;
 
 private:
 
@@ -113,11 +117,17 @@ private:
 	void update_positions(float delta);
 
 	// Calculate collisions that might have ocurred.
-	void update_collisions(float delta);
+	void update_spatial_index(float delta);
 
 	// Spawn a new agent at an available position.
 	int spawn_agent(vec2f position, float mass, State state);
 
 	// Defines wheter simulation should be rendered.
 	bool has_visualization;
+
+	inline void simulate_hunting(size_t index);
+
+	inline void simulate_incubating(size_t index);
+
+	inline void simulate_splitting(size_t index);
 };

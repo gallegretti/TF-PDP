@@ -4,13 +4,28 @@ struct vec2f {
 	vec2f(float x, float y) : x(x), y(y)
 	{
 	}
-	float length() {
+
+	inline vec2f operator+(vec2f rhs)
+	{
+		return vec2f(x + rhs.x, y + rhs.y);
+	}
+
+	inline vec2f operator-(vec2f rhs)
+	{
+		return vec2f(x - rhs.x, y - rhs.y);
+	}
+
+	inline static float squared_distance(vec2f lhs, vec2f rhs)
+	{
+		return pow((lhs.x - rhs.x), 2) + pow((rhs.y - rhs.y), 2);
+	}
+	inline float length() {
 		return sqrt((x * x) + (y * y));
 	}
-	float squared_length() {
+	inline float squared_length() {
 		return (x * x) + (y * y);
 	}
-	void normalize() {
+	inline void normalize() {
 		float factor = 1 / length();
 		x *= factor;
 		y *= factor;

@@ -18,9 +18,13 @@ public:
 	// Agent 'index' moved from old_position to new_position
 	void moved(size_t index, vec2f old_position, vec2f new_position);
 
+	const std::vector<size_t>& close_to(vec2f position);
+
 	int chunk_index(vec2f position);
 
 	int divisions_per_dimension;
+
+	int divisions_over_two;
 
 	float chunk_size;
 

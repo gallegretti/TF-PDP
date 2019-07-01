@@ -2,7 +2,8 @@
 
 SpatialIndex::SpatialIndex(float map_size) : map_size(map_size)
 {
-	divisions_per_dimension = 4;
+	divisions_per_dimension = 8;
+	divisions_over_two = divisions_per_dimension / 2;
 	chunk_size = (map_size * 2.0f) / divisions_per_dimension;
 
 	for (int i = 0; i < divisions_per_dimension * divisions_per_dimension; i++)
@@ -39,9 +40,14 @@ void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 	}
 }
 
+const std::vector<size_t>& SpatialIndex::close_to(vec2f position)
+{
+	return chunks.at(chunk_index(position));
+}
+
 int SpatialIndex::chunk_index(vec2f position)
 {
-	int x_pos = (divisions_per_dimension / 2) + position.x / chunk_size;
-	int y_pos = (divisions_per_dimension / 2) + position.y / chunk_size;
+	int x_pos = divisions_over_two + position.x / chunk_size;
+	int y_pos = divisions_over_two + position.y / chunk_size;
 	return x_pos + y_pos * divisions_per_dimension;
 }
