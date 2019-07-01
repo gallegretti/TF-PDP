@@ -33,11 +33,11 @@ void Visualization::run()
 			}
 		}
 
-		LOG(INFO) << "Visualization waiting for lock";
+		LOG(DEBUG) << "Visualization waiting for lock";
 		// Critical region
 		{
 			std::scoped_lock lock(simulation->rendering);
-			LOG(INFO) << "Visualization got lock";
+			LOG(DEBUG) << "Visualization got lock";
 			if (simulation->is_done)
 			{
 				return;
@@ -47,7 +47,7 @@ void Visualization::run()
 			render_visualization();
 		}
 
-		LOG(INFO) << "Visualization released lock";
+		LOG(DEBUG) << "Visualization released lock";
 		window.display();
 		last_frame.restart();
 	}
@@ -60,7 +60,7 @@ void Visualization::render_visualization()
 	for (int i = 0; i < simulation->positions.size(); i++)
 	{
 		const vec2f& agent_position = simulation->positions[i];
-		const float& agent_size = simulation->mass[i];
+		const float& agent_size = simulation->masses[i];
 		circle.setPosition({ agent_position.x, agent_position.y });
 		// TODO: Change color per agent
 		circle.setFillColor(sf::Color::Blue);

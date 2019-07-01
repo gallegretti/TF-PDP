@@ -7,6 +7,28 @@
 #include <atomic>
 #include "vec2f.h"
 
+/*
+	PALS
+		Parallel programming through an
+		Artificial
+		Life
+		Simulation
+
+	Diego Dasso Migotto, Gabriel Allegretti
+
+	About the simulation
+		The agents operate in a two-dimensional space
+		The agents move at constant speed and can grow in size
+		The agents must spend their mass to move
+		An agent can incubate in an unmovable state, growing it's mass
+		An agent can hunt other agents to prey on them
+		An agent can split itself in two when it grows too big
+
+	About the parallellization
+		The agents will update it's state, plan their actions and move in parallel
+		Collision computing will be done sequentially
+*/
+
 // Possible states for each agent
 enum class State {
 	Incubating,	// Standing still and gaining mass
@@ -20,66 +42,74 @@ struct EntityActionResult {
 	bool divide;
 };
 
+// Contains all simulation logic and data
 class Simulation
 {
 public:
 
-	Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed);
+	// Constructor, takes starting number of agents, maximum number of agents,
+	// number of iterations, random seed and a flag enabling rendering.
+	Simulation(size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed, bool has_visualization);
 
 	// Lock used by the visualization thread
 	std::mutex rendering;
 
-	std::condition_variable cv;
-
-	/*
-	Sobre a simulação:
-	-Os organismos vivem em um ambiente finito de duas dimensões
-	-Um organismo pode se alimentar de outro, caso seja maior e esteja sobre o outro
-	-Um organismo pode se alimentar de nutrientes (aparecem aleatoriamente no ambiente)
-	-Após atingir certo tamanho, um organismo de divide em dois
-	-Com o passar do tempo, organismos gastam energia e perdem tamanho
-	-Um organismo pode se mover em qualquer direção
-	Sobre a paralelização:
-	-Os organismos vão tomar ações, atualizar suas posições e velocidades ao mesmo tempo.
-	-Barreira de sincronização
-	-Atualização de colisões, reprodução e alimentação
-	*/
-
+	// Simulation main loop, run for the specified amount of steps at simulation construction.
+	// Optionally render the simulatino every x steps.
 	void run();
 
+	// A step of the simulation updates each agent state and it's position.
 	void step(float delta);
 
-	// The map is centered at (0, 0)
-	std::vector<vec2f> movements;
-	std::vector<vec2f> positions;
-	std::vector<float> mass;
-	std::vector<std::atomic<State>> states;
+	// The simulation data is organized in a data oriented fashion.
+	// Each index in the data structures represents an agent.
+	// The simulation space is a 2D continuous map centered at (0.0, 0.0).
+	std::vector<vec2f> movements;			// Planned movement data.
+	std::vector<vec2f> positions;			// Position data.
+	std::vector<float> masses;				// Mass data.
+	std::vector<std::atomic<State>> states;	// States data.
 
+	// Number of iterations the simulation will run for.
 	int n_iterations;
 
+	// Current higher index for a living agent
+	size_t last_agent_index;
+
+	// State of the simulation.
 	bool is_done = false;
 
+	// Constant map dimension size.
 	static constexpr float map_size = 1024;
 
-	static constexpr float maximum_velocity = 1.0f;
-
-	static constexpr float squared_maximum_velocity = maximum_velocity * maximum_velocity;
-
+	// Threshold for an agent go back to incubating state.
 	static constexpr float incubating_mass = 1.0f;
 
+	// Threshold for an agent start hunting.
 	static constexpr float hunting_mass = 2.0f;
 
+	// Threshold for an agent to split it self in two.
 	static constexpr float splitting_mass = 10.0f;
 
+	// Cost in mass for an agent to take an action.
 	static constexpr float mass_cost = 0.1f;
 
 private:
 
+	// Respawn a constant amount of dead agents.
 	void respawn_agents(float delta);
 
+	// Update states of all living agents.
 	void update_states(float delta);
 
+	// Update position of all living agents;
 	void update_positions(float delta);
 
+	// Calculate collisions that might have ocurred.
 	void update_collisions(float delta);
+
+	// Spawn a new agent at an available position.
+	int spawn_agent(vec2f position, float mass, State state);
+
+	// Defines wheter simulation should be rendered.
+	bool has_visualization;
 };

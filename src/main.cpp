@@ -10,6 +10,8 @@ INITIALIZE_EASYLOGGINGPP
 int main(int argc, char* argv[])
 {
 	// Initialize
+	el::Configurations logging_conf;
+
 	LOG(INFO) << "Started";
 	Remotery* rmt;
 	rmt_CreateGlobalInstance(&rmt);
@@ -18,8 +20,18 @@ int main(int argc, char* argv[])
 	// Read args
 	Settings settings(argc, argv);
 
+	// TODO: Check if works
+	if (settings.debug)
+	{
+		el::Loggers::setVerboseLevel(4);
+	}
+	else
+	{
+		el::Loggers::setVerboseLevel(1);
+	}
+
 	// Start simulation
-	Simulation simulation(settings.n_start_agents, settings.n_maximum_agents, settings.n_iterations, settings.seed);
+	Simulation simulation(settings.n_start_agents, settings.n_maximum_agents, settings.n_iterations, settings.seed, !settings.is_headless);
 	std::thread simulation_thread([&]() {
 		simulation.run();
 	});
