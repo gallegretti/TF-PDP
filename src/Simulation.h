@@ -52,7 +52,7 @@ public:
 	// number of iterations, random seed and a flag enabling rendering.
 	Simulation(Settings simulation_settings);
 
-	// Lock used by the visualization thread
+	// Lock used by the rendering thread
 	std::mutex rendering;
 
 	// Simulation main loop, run for the specified amount of steps at simulation construction.
@@ -65,11 +65,11 @@ public:
 	// The simulation data is organized in a data oriented fashion.
 	// Each index in the data structures represents an agent.
 	// The simulation space is a 2D continuous map centered at (0.0, 0.0).
-	std::vector<vec2f> movements;			// Planned movement data.
-	std::vector<vec2f> positions;			// Position data.
-	std::vector<float> masses;				// Mass data.
+	std::vector<vec2f> movements;           // Planned movement data.
+	std::vector<vec2f> last_positions;      // Position data from last simulation step.
+	std::vector<vec2f> positions;           // Position data.
+	std::vector<float> masses;              // Mass data.
 	std::vector<std::atomic<State>> states;	// States data.
-	std::vector<vec2f> last_positions;
 
 	// Numebr of threads the simulation will use
 	size_t n_threads;

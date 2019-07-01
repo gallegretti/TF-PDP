@@ -183,7 +183,7 @@ inline void Simulation::simulate_hunting(size_t index)
 	float closer_distance = 0.0f;
 	for (size_t agent : nearby)
 	{
-		if (agent == index)
+		if (agent == index || states[agent] != State::Incubating)
 		{
 			continue;
 		}
@@ -195,6 +195,8 @@ inline void Simulation::simulate_hunting(size_t index)
 			closer_distance = distance;
 		}
 	}
+
+	// TODO: 'Eat' incubating agent
 
 	vec2f destination_pos = positions[closer_agent];
 	movement = (position - destination_pos);
