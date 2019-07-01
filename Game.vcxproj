@@ -121,6 +121,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Settings.cpp" />
     <ClCompile Include="src\Simulation.cpp" />
     <ClCompile Include="src\SpatialIndex.cpp" />
     <ClCompile Include="src\ThirdParty\easylogging\easylogging\easylogging++.cc" />
