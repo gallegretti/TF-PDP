@@ -4,8 +4,8 @@ Settings::Settings(int argc, char * argv[])
 {
 	args::ArgumentParser parser("Trabalho final de PDP");
 	args::Group optional(parser, "", args::Group::Validators::DontCare);
-	args::ValueFlag<int> start_agents_number(optional, "start-n", "Starting number of agents", { "start-n" }, 1024 * 256);
-	args::ValueFlag<int> maximum_agents_number(optional, "max-n", "Maximum number of agents", { "max-n" }, 1024 * 256 * 2);
+	args::ValueFlag<int> start_agents_number(optional, "start-n", "Starting number of agents", { "start-n" }, 1024 * 512);
+	args::ValueFlag<int> maximum_agents_number(optional, "max-n", "Maximum number of agents", { "max-n" }, 1024 * 512 * 2);
 	args::ValueFlag<int> seed(optional, "seed", "Seed for the RNG", { 's', "seed" }, 123456);
 	args::ValueFlag<int> threads(optional, "threads", "Maximum number of threads to run", { 't', "threads" }, 1);
 	args::ValueFlag<int> iterations(optional, "iterations", "Number of iterations to simulate", { 'i', "iterations" }, 1000);
