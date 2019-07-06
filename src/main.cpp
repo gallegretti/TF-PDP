@@ -1,7 +1,6 @@
 #include <SFML/System/Clock.hpp>
 #include <thread>
 #include <optional>
-#include "ThirdParty/remotery/Remotery.h"
 #include "ThirdParty/easylogging/easylogging/easylogging++.h"
 INITIALIZE_EASYLOGGINGPP
 #include "Visualization.h"
