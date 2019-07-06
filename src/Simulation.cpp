@@ -25,6 +25,7 @@ Simulation::Simulation(Settings settings) :
 	positions.reserve(settings.n_maximum_agents);
 	last_positions.reserve(settings.n_maximum_agents);
 	masses.reserve(settings.n_maximum_agents);
+	eaten.reserve(settings.n_maximum_agents);
 
 	for (size_t i = 0; i < settings.n_start_agents; i++)
 	{
@@ -35,6 +36,7 @@ Simulation::Simulation(Settings settings) :
 
 		movements.push_back(vec2f(0.1f, 0.1f));
 		masses.push_back(mass_distribution(generator));
+		eaten.push_back(std::numeric_limits<size_t>::max());
 		states[i].store(State::Incubating);
 	}
 
@@ -46,6 +48,7 @@ Simulation::Simulation(Settings settings) :
 		positions.push_back(vec2f(0.0f, 0.0f));
 		last_positions.push_back(vec2f(0.0f, 0.0f));
 		masses.push_back(0.0f);
+		eaten.push_back(std::numeric_limits<size_t>::max());
 		states[i].store(State::Dead);
 	}
 }
@@ -76,22 +79,34 @@ void Simulation::run()
 
 void Simulation::step(float delta)
 {
-	// 0: Create new agents
-	respawn_agents(delta);
+	// 0: Update eaten agents on last step
+	update_eaten_agents(delta);
 
 	// 1: Update state based on current status
 	update_states(delta);
 
-	// 2: Update position based on movement
+	// 2: Update position based on movement and update spatial index
 	update_positions(delta);
-
-	// 3: Update spatial index
-	update_spatial_index(delta);
 }
 
-void Simulation::respawn_agents(float delta)
+void Simulation::update_eaten_agents(float delta)
 {
-
+	#pragma omp parallel for num_threads(n_threads)
+	for (int i = 0; i < last_agent_index; i++)
+	{
+		size_t eaten_index = eaten[i];
+		if (eaten_index != no_agent)
+		{
+			State incubating = State::Incubating;
+			State dead = State::Dead;
+			// Two agents could try to eat the same incubating agent at once. Only one will get it
+			if (states[eaten_index].compare_exchange_strong(incubating, dead))
+			{
+				masses[i] += masses[eaten_index];
+			}
+			eaten[i] = no_agent;
+		}
+	}
 }
 
 void Simulation::update_states(float delta)
@@ -186,26 +201,38 @@ inline void Simulation::simulate_hunting(size_t index)
 		return;
 	}
 
-	size_t closer_agent = 0;
-	float closer_distance = std::numeric_limits<float>::infinity();
+	size_t closer_agent_index = no_agent;
+	float closer_distance_squared = std::numeric_limits<float>::infinity();
 	for (size_t agent : nearby)
 	{
 		if (agent == index || states[agent] != State::Incubating)
 		{
 			continue;
 		}
-		// TODO: Break if close enough
-		float distance = vec2f::squared_distance(position, positions[agent]);
-		if (distance < closer_distance)
+		float squared_distance = vec2f::squared_distance(position, positions[agent]);
+		if (squared_distance < closer_distance_squared)
 		{
-			closer_agent = agent;
-			closer_distance = distance;
+			closer_agent_index = agent;
+			closer_distance_squared = squared_distance;
 		}
 	}
+	
+	// No target nearby
+	if (closer_agent_index == no_agent)
+	{
+		movement = vec2f(0.0f, 0.0f);
+		return;
+	}
 
-	// TODO: 'Eat' incubating agent
+	// 'Eat' incubating agent if close enough
+	if (closer_distance_squared < (max_eat_distance * max_eat_distance))
+	{
+		eaten[index] = closer_agent_index;
+		movement = vec2f(0.0f, 0.0f);
+		return;
+	}
 
-	vec2f destination_pos = positions[closer_agent];
+	vec2f destination_pos = positions[closer_agent_index];
 	movement = (position - destination_pos);
 	movement.normalize();
 
@@ -267,15 +294,6 @@ void Simulation::update_positions(float delta)
 
 		// Update index
 		spatial_index.moved(i, old_position, position);
-	}
-}
-
-void Simulation::update_spatial_index(float delta)
-{
-	#pragma omp parallel for num_threads(n_threads)
-	for (int i = 0; i < last_positions.size(); i++)
-	{
-		spatial_index.moved(i, last_positions[i], positions[i]);
 	}
 }
 

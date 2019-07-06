@@ -69,6 +69,7 @@ public:
 	std::vector<vec2f> last_positions;      // Position data from last simulation step.
 	std::vector<vec2f> positions;           // Position data.
 	std::vector<float> masses;              // Mass data.
+	std::vector<size_t> eaten;              // Eaten entity index
 	std::vector<std::atomic<State>> states;	// States data.
 
 	// Numebr of threads the simulation will use
@@ -102,22 +103,24 @@ public:
 	// Reward in mass for an agent to incubate
 	static constexpr float incubate_mass_reward = 0.1f;
 
+	// Maximum distance between two agents so one can eat the other
+	static constexpr float max_eat_distance = 1.0f;
+
 private:
+
+	const size_t no_agent = std::numeric_limits<size_t>::max();
 
 	// Spatial index for efficient position-based lookups
 	SpatialIndex spatial_index;
 
-	// Respawn a constant amount of dead agents.
-	void respawn_agents(float delta);
+	// Update eaten agents.
+	void update_eaten_agents(float delta);
 
 	// Update states of all living agents.
 	void update_states(float delta);
 
 	// Update position of all living agents;
 	void update_positions(float delta);
-
-	// Calculate collisions that might have ocurred.
-	void update_spatial_index(float delta);
 
 	// Spawn a new agent at an available position.
 	int spawn_agent(vec2f position, float mass, State state);
