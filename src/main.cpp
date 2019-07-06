@@ -13,9 +13,6 @@ int main(int argc, char* argv[])
 	el::Configurations logging_conf;
 
 	LOG(INFO) << "Started";
-	Remotery* rmt;
-	rmt_CreateGlobalInstance(&rmt);
-	_rmt_SetCurrentThreadName("Main");
 
 	// Read args
 	Settings settings(argc, argv);
@@ -53,8 +50,6 @@ int main(int argc, char* argv[])
 		visualization->join();
 	}
 
-	// Destroy the main instance of Remotery.
-	rmt_DestroyGlobalInstance(rmt);
 	LOG(INFO) << "Finished";
 	return 0;
 }
