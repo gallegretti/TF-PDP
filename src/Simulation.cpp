@@ -1,6 +1,5 @@
 #include "Simulation.h"
 
-// size_t start_n_agents, size_t maximum_agents, int n_iterations, int seed, bool has_visualization
 Simulation::Simulation(Settings settings) :
 	states(std::vector<std::atomic<State>>(settings.n_maximum_agents)),
 	n_iterations(settings.n_iterations),
@@ -88,7 +87,7 @@ void Simulation::step(float delta)
 
 void Simulation::update_eaten_agents(float delta)
 {
-	// #pragma omp parallel for num_threads(n_threads)
+	#pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
 		size_t eaten_index = eaten[i];
@@ -116,13 +115,14 @@ void Simulation::update_states(float delta)
 		vec2f& position = positions[i];
 		vec2f& movement = movements[i];
 
-		// Change state
+		// Update state and take action
 		switch (state.load())
 		{
 		case State::Incubating:
 			if (mass >= hunting_mass)
 			{
 				state.store(State::Hunting);
+				simulate_hunting(i);
 			}
 			break;
 
@@ -130,10 +130,15 @@ void Simulation::update_states(float delta)
 			if (mass <= incubating_mass)
 			{
 				state.store(State::Incubating);
+				simulate_incubating(i);
 			}
 			else if (masses[i] >= splitting_mass)
 			{
-				state.store(State::Splitting);
+				simulate_splitting(i);
+			}
+			else
+			{
+				simulate_hunting(i);
 			}
 			break;
 
@@ -141,33 +146,13 @@ void Simulation::update_states(float delta)
 			if (mass >= hunting_mass)
 			{
 				state.store(State::Hunting);
+				simulate_hunting(i);
 			}
 			else
 			{
 				state.store(State::Incubating);
+				simulate_incubating(i);
 			}
-			break;
-
-		case State::Dead:
-			break;
-
-		default:
-			break;
-		}
-
-		// Take action
-		switch (state.load())
-		{
-		case State::Incubating:
-			simulate_incubating(i);
-			break;
-
-		case State::Hunting:
-			simulate_hunting(i);
-			break;
-
-		case State::Splitting:
-			simulate_splitting(i);
 			break;
 
 		case State::Dead:
@@ -257,7 +242,8 @@ void Simulation::update_positions(float delta)
 	#pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
-		if (states[i].load() == State::Hunting)
+		State current_state = states[i].load();
+		if (current_state == State::Hunting)
 		{
 			vec2f& position = positions[i];
 			vec2f& movement = movements[i];
@@ -288,7 +274,14 @@ void Simulation::update_positions(float delta)
 			// Update index
 			spatial_index.moved(i, old_position, position);
 		}
+		if (current_state == State::Splitting)
+		{
+			states[i].store(State::Hunting);
+			vec2f& position = positions[i];
+			spatial_index.set(i, position);
+		}
 	}
+	
 }
 
 int Simulation::spawn_agent(vec2f position, float mass, State state)
@@ -298,7 +291,8 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 		State dead = State::Dead;
 		if (states[i].compare_exchange_strong(dead, state))
 		{
-			spatial_index.set(i, position);
+			// Can't modify spatial index, other threads are reading it
+			// or have references to chunks
 			positions[i] = position;
 			masses[i] = mass;
 			return i;
@@ -307,5 +301,4 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 
 	LOG(WARNING) << "Failed to create new agent";
 	return -1;
-	return 0;
 }
