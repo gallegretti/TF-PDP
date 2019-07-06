@@ -26,7 +26,7 @@ public:
 
 	int chunk_index(vec2f position);
 
-	int divisions_per_dimension;
+	static constexpr int divisions_per_dimension = 16;
 
 	int divisions_over_two;
 

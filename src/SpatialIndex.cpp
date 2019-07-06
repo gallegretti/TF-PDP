@@ -2,7 +2,6 @@
 
 SpatialIndex::SpatialIndex(float map_size) : map_size(map_size)
 {
-	divisions_per_dimension = 8;
 	divisions_over_two = divisions_per_dimension / 2;
 	chunk_size = (map_size * 2.0f) / divisions_per_dimension;
 
