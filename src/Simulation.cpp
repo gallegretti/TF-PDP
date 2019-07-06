@@ -179,8 +179,15 @@ inline void Simulation::simulate_hunting(size_t index)
 	// Move to the closer incubating agent
 	const std::vector<size_t>& nearby = spatial_index.close_to(position);
 
+	// No one else nearby
+	if (nearby.empty() || (nearby.size() == 1 && nearby[0] == index))
+	{
+		movement = vec2f(0.0f, 0.0f);
+		return;
+	}
+
 	size_t closer_agent = 0;
-	float closer_distance = 0.0f;
+	float closer_distance = std::numeric_limits<float>::infinity();
 	for (size_t agent : nearby)
 	{
 		if (agent == index || states[agent] != State::Incubating)
