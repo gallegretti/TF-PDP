@@ -1,3 +1,4 @@
+#include <SFML/System/Clock.hpp>
 #include <thread>
 #include <optional>
 #include "ThirdParty/remotery/Remotery.h"
@@ -14,8 +15,11 @@ int main(int argc, char* argv[])
 
 	LOG(INFO) << "Started";
 
+	sf::Clock clock;
+
 	// Read args
 	Settings settings(argc, argv);
+	settings.is_headless = true;
 
 	// TODO: Check if works
 	if (settings.debug)
@@ -50,6 +54,6 @@ int main(int argc, char* argv[])
 		visualization->join();
 	}
 
-	LOG(INFO) << "Finished";
+	LOG(INFO) << "Total time: " << clock.getElapsedTime().asMilliseconds() << "ms";
 	return 0;
 }

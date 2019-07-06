@@ -23,7 +23,6 @@ Simulation::Simulation(Settings settings) :
 
 	movements.reserve(settings.n_maximum_agents);
 	positions.reserve(settings.n_maximum_agents);
-	last_positions.reserve(settings.n_maximum_agents);
 	masses.reserve(settings.n_maximum_agents);
 	eaten.reserve(settings.n_maximum_agents);
 
@@ -31,7 +30,6 @@ Simulation::Simulation(Settings settings) :
 	{
 		vec2f position(map_distribution(generator), map_distribution(generator));
 		positions.push_back(position);
-		last_positions.push_back(position);
 		spatial_index.set(i, position);
 
 		movements.push_back(vec2f(0.1f, 0.1f));
@@ -46,7 +44,6 @@ Simulation::Simulation(Settings settings) :
 	{
 		movements.push_back(vec2f(0.0f, 0.0f));
 		positions.push_back(vec2f(0.0f, 0.0f));
-		last_positions.push_back(vec2f(0.0f, 0.0f));
 		masses.push_back(0.0f);
 		eaten.push_back(std::numeric_limits<size_t>::max());
 		states[i].store(State::Dead);
@@ -91,18 +88,18 @@ void Simulation::step(float delta)
 
 void Simulation::update_eaten_agents(float delta)
 {
-	#pragma omp parallel for num_threads(n_threads)
+	// #pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
 		size_t eaten_index = eaten[i];
 		if (eaten_index != no_agent)
 		{
 			State incubating = State::Incubating;
-			State dead = State::Dead;
 			// Two agents could try to eat the same incubating agent at once. Only one will get it
-			if (states[eaten_index].compare_exchange_strong(incubating, dead))
+			if (states[eaten_index].compare_exchange_strong(incubating, State::Dead))
 			{
 				masses[i] += masses[eaten_index];
+				spatial_index.remove(eaten_index, positions[eaten_index]);
 			}
 			eaten[i] = no_agent;
 		}
@@ -118,9 +115,6 @@ void Simulation::update_states(float delta)
 		std::atomic<State>& state = states[i];
 		vec2f& position = positions[i];
 		vec2f& movement = movements[i];
-
-		// Update last position
-		last_positions[i] = position;
 
 		// Change state
 		switch (state.load())
@@ -249,16 +243,13 @@ inline void Simulation::simulate_incubating(size_t index)
 
 inline void Simulation::simulate_splitting(size_t index)
 {
-	vec2f& position = positions[index];
 	float& mass = masses[index];
-
-	spawn_agent(
-		vec2f(position.x + 1.0f, position.y + 1.0f),
-		mass / 2.0f,
-		State::Splitting);
-	position.x -= 1.0f;
-	position.y -= 1.0f;
 	mass = mass / 2.0f;
+	vec2f new_position = positions[index] + vec2f(1.0f, 1.0f);
+	spawn_agent(
+		new_position,
+		mass,
+		State::Splitting);
 }
 
 void Simulation::update_positions(float delta)
@@ -266,34 +257,37 @@ void Simulation::update_positions(float delta)
 	#pragma omp parallel for num_threads(n_threads)
 	for (int i = 0; i < last_agent_index; i++)
 	{
-		vec2f& position = positions[i];
-		vec2f& movement = movements[i];
-		vec2f old_position = position;
+		if (states[i].load() == State::Hunting)
+		{
+			vec2f& position = positions[i];
+			vec2f& movement = movements[i];
+			vec2f old_position = position;
 
-		// Update position
-		position.x += movement.x * delta;
-		position.y += movement.y * delta;
+			// Update position
+			position.x += movement.x * delta;
+			position.y += movement.y * delta;
 
-		// Map collision
-		if (position.x < -map_size)
-		{
-			position.x = -map_size;
-		}
-		if (position.x > map_size)
-		{
-			position.x = map_size;
-		}
-		if (position.y < -map_size)
-		{
-			position.y = -map_size;
-		}
-		if (position.y > map_size)
-		{
-			position.y = map_size;
-		}
+			// Map collision
+			if (position.x < -map_size)
+			{
+				position.x = -map_size;
+			}
+			if (position.x > map_size)
+			{
+				position.x = map_size;
+			}
+			if (position.y < -map_size)
+			{
+				position.y = -map_size;
+			}
+			if (position.y > map_size)
+			{
+				position.y = map_size;
+			}
 
-		// Update index
-		spatial_index.moved(i, old_position, position);
+			// Update index
+			spatial_index.moved(i, old_position, position);
+		}
 	}
 }
 
@@ -304,6 +298,7 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 		State dead = State::Dead;
 		if (states[i].compare_exchange_strong(dead, state))
 		{
+			spatial_index.set(i, position);
 			positions[i] = position;
 			masses[i] = mass;
 			return i;
@@ -312,4 +307,5 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 
 	LOG(WARNING) << "Failed to create new agent";
 	return -1;
+	return 0;
 }

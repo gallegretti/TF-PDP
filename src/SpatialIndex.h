@@ -1,4 +1,5 @@
 #pragma once
+#include <easylogging/easylogging++.h>
 #include <mutex>
 #include <algorithm>
 #include <vector>
@@ -14,6 +15,9 @@ public:
 
 	// New agent 'index' is at position
 	void set(size_t index, vec2f position);
+
+	// Remove agent 'index'
+	void remove(size_t index, vec2f position);
 
 	// Agent 'index' moved from old_position to new_position
 	void moved(size_t index, vec2f old_position, vec2f new_position);

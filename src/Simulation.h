@@ -66,14 +66,13 @@ public:
 	// Each index in the data structures represents an agent.
 	// The simulation space is a 2D continuous map centered at (0.0, 0.0).
 	std::vector<vec2f> movements;           // Planned movement data.
-	std::vector<vec2f> last_positions;      // Position data from last simulation step.
 	std::vector<vec2f> positions;           // Position data.
 	std::vector<float> masses;              // Mass data.
 	std::vector<size_t> eaten;              // Eaten entity index
 	std::vector<std::atomic<State>> states;	// States data.
 
 	// Numebr of threads the simulation will use
-	size_t n_threads;
+	int n_threads;
 
 	// Number of iterations the simulation will run for.
 	int n_iterations;

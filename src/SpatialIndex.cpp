@@ -14,7 +14,22 @@ SpatialIndex::SpatialIndex(float map_size) : map_size(map_size)
 
 void SpatialIndex::set(size_t index, vec2f position)
 {
+	std::scoped_lock(critial_region);
 	chunks.at(chunk_index(position)).push_back(index);
+}
+
+void SpatialIndex::remove(size_t index, vec2f position)
+{
+	std::scoped_lock(critial_region);
+	int old_chunk_index = chunk_index(position);
+	auto& old_chunk = chunks.at(old_chunk_index);
+	auto remove_it = std::remove(old_chunk.begin(), old_chunk.end(), index);
+	if (remove_it == old_chunk.end())
+	{
+		LOG(INFO) << "Trying to remove missing index " << index;
+		return;
+	}
+	old_chunk.erase(remove_it);
 }
 
 void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
@@ -33,7 +48,13 @@ void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 
 		// Remove from old chunk
 		auto& old_chunk = chunks.at(old_chunk_index);
-		old_chunk.erase(std::remove(old_chunk.begin(), old_chunk.end(), index));
+		auto remove_it = std::remove(old_chunk.begin(), old_chunk.end(), index);
+		if (remove_it == old_chunk.end())
+		{
+			LOG(INFO) << "Trying to move missing index " << index;
+			return;
+		}
+		old_chunk.erase(remove_it);
 
 		// Add to new chunk
 		chunks.at(chunk_index(new_position)).push_back(index);
