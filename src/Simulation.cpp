@@ -200,10 +200,8 @@ inline void Simulation::simulate_hunting(size_t index)
 
 inline void Simulation::simulate_incubating(size_t index)
 {
-	vec2f& movement = movements[index];
-	float& mass = masses[index];
-	movement = vec2f(0.0f, 0.0f);
-	mass += incubate_mass_reward;
+	movements[index] = vec2f(0.0f, 0.0f);
+	masses[index] += incubate_mass_reward;
 }
 
 inline void Simulation::simulate_splitting(size_t index)
