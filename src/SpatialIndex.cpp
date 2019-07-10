@@ -22,7 +22,7 @@ void SpatialIndex::remove(size_t index, vec2f position)
 	std::scoped_lock(critial_region);
 	int old_chunk_index = chunk_index(position);
 	auto& old_chunk = chunks.at(old_chunk_index);
-	auto remove_it = std::remove(old_chunk.begin(), old_chunk.end(), index);
+	auto remove_it = std::find(old_chunk.begin(), old_chunk.end(), index);
 	if (remove_it == old_chunk.end())
 	{
 		LOG(INFO) << "Trying to remove missing index " << index;
