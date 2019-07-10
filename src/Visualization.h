@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <thread>
 #include <SFML/Graphics.hpp>
 #include <easylogging/easylogging++.h>

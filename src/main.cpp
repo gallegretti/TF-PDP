@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
 
 	// Read args
 	Settings settings(argc, argv);
-	settings.is_headless = true;
 
 	// TODO: Check if works
 	if (settings.debug)

@@ -30,11 +30,7 @@ void Visualization::run()
 			}
 		}
 
-		LOG(DEBUG) << "Visualization waiting for lock";
-		// Critical region
 		{
-			std::scoped_lock lock(simulation->rendering);
-			LOG(DEBUG) << "Visualization got lock";
 			if (simulation->is_done)
 			{
 				return;
@@ -44,7 +40,6 @@ void Visualization::run()
 			render_visualization();
 		}
 
-		LOG(DEBUG) << "Visualization released lock";
 		window.display();
 		last_frame.restart();
 	}
@@ -52,14 +47,24 @@ void Visualization::run()
 
 void Visualization::render_visualization()
 {
+	size_t num_agents = std::min(simulation->positions.size(), (size_t) 1024 * 4);
 	sf::CircleShape circle;
-	for (int i = 0; i < simulation->positions.size(); i++)
+	for (int i = 0; i < num_agents; i++)
 	{
 		const vec2f& agent_position = simulation->positions[i];
 		const float& agent_size = simulation->masses[i];
 		circle.setPosition({ agent_position.x, agent_position.y });
 		// TODO: Change color per agent
-		circle.setFillColor(sf::Color::Blue);
+		State state = simulation->states[i].load();
+		if (state == State::Dead) {
+			continue;
+		}
+		if (state == State::Hunting) {
+			circle.setFillColor(sf::Color::Red);
+		}
+		else if (state == State::Incubating) {
+			circle.setFillColor(sf::Color::Blue);
+		}
 		circle.setRadius(agent_size);
 		window.draw(circle);
 	}

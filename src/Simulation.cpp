@@ -54,20 +54,9 @@ void Simulation::run()
 	// Only lock/unlock mutex every few simulation steps reduce the lock overhead
 	for (int i = 0; i < n_iterations / 128; i++)
 	{
-		if (has_visualization)
-		{
-			LOG(DEBUG) << "Simulation waiting for lock";
-			rendering.lock();
-			LOG(DEBUG) << "Simulation got lock";
-		}
 		for (int j = 0; j < 128; j++)
 		{
-			step(0.1f);
-		}
-		if (has_visualization)
-		{
-			rendering.unlock();
-			LOG(DEBUG) << "Simulation released lock";
+			step(0.01f);
 		}
 	}
 	is_done = true;
@@ -123,6 +112,10 @@ void Simulation::update_states(float delta)
 			{
 				state.store(State::Hunting);
 				simulate_hunting(i);
+			}
+			else
+			{
+				simulate_incubating(i);
 			}
 			break;
 
@@ -196,6 +189,8 @@ inline void Simulation::simulate_hunting(size_t index)
 		}
 	}
 	
+	mass -= move_mass_cost;
+
 	// No target nearby
 	if (closer_agent_index == no_agent)
 	{
@@ -214,8 +209,6 @@ inline void Simulation::simulate_hunting(size_t index)
 	vec2f destination_pos = positions[closer_agent_index];
 	movement = (position - destination_pos);
 	movement.normalize();
-
-	mass -= move_mass_cost;
 }
 
 inline void Simulation::simulate_incubating(size_t index)

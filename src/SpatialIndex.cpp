@@ -56,7 +56,8 @@ void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 		old_chunk.erase(remove_it);
 
 		// Add to new chunk
-		chunks.at(chunk_index(new_position)).push_back(index);
+		int new_chunk_index = chunk_index(new_position);
+		chunks.at(new_chunk_index).push_back(index);
 	}
 }
 
@@ -67,7 +68,9 @@ const std::vector<size_t>& SpatialIndex::close_to(vec2f position)
 
 int SpatialIndex::chunk_index(vec2f position)
 {
-	int x_pos = divisions_over_two + position.x / chunk_size;
-	int y_pos = divisions_over_two + position.y / chunk_size;
+	position.x += map_size;
+	position.y += map_size;
+	int x_pos = std::min((int)(position.x / chunk_size), divisions_per_dimension - 1);
+	int y_pos = std::min((int)(position.y / chunk_size), divisions_per_dimension - 1);
 	return x_pos + y_pos * divisions_per_dimension;
 }

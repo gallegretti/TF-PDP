@@ -1,6 +1,5 @@
 #pragma once
 #include <easylogging/easylogging++.h>
-#include <mutex>
 #include <random>
 #include <vector>
 #include <atomic>
@@ -52,9 +51,6 @@ public:
 	// number of iterations, random seed and a flag enabling rendering.
 	Simulation(Settings simulation_settings);
 
-	// Lock used by the rendering thread
-	std::mutex rendering;
-
 	// Simulation main loop, run for the specified amount of steps at simulation construction.
 	// Optionally render the simulatino every x steps.
 	void run();
@@ -68,7 +64,7 @@ public:
 	std::vector<vec2f> movements;           // Planned movement data.
 	std::vector<vec2f> positions;           // Position data.
 	std::vector<float> masses;              // Mass data.
-	std::vector<size_t> eaten;              // Eaten entity index
+	std::vector<size_t> eaten;              // Eaten entity index.
 	std::vector<std::atomic<State>> states;	// States data.
 
 	// Numebr of threads the simulation will use
