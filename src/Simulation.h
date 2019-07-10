@@ -74,6 +74,7 @@ public:
 	int n_iterations;
 
 	// Current higher index for a living agent
+	std::mutex last_agent_index_mutex;
 	size_t last_agent_index;
 
 	// State of the simulation.

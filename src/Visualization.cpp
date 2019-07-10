@@ -51,10 +51,6 @@ void Visualization::render_visualization()
 	sf::CircleShape circle;
 	for (int i = 0; i < num_agents; i++)
 	{
-		const vec2f& agent_position = simulation->positions[i];
-		const float& agent_size = simulation->masses[i];
-		circle.setPosition({ agent_position.x, agent_position.y });
-		// TODO: Change color per agent
 		State state = simulation->states[i].load();
 		if (state == State::Dead) {
 			continue;
@@ -65,6 +61,9 @@ void Visualization::render_visualization()
 		else if (state == State::Incubating) {
 			circle.setFillColor(sf::Color::Blue);
 		}
+		const vec2f& agent_position = simulation->positions[i];
+		const float& agent_size = simulation->masses[i];
+		circle.setPosition({ agent_position.x, agent_position.y });
 		circle.setRadius(agent_size);
 		window.draw(circle);
 	}

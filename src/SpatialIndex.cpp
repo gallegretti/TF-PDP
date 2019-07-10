@@ -47,7 +47,7 @@ void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 
 		// Remove from old chunk
 		auto& old_chunk = chunks.at(old_chunk_index);
-		auto remove_it = std::remove(old_chunk.begin(), old_chunk.end(), index);
+		auto remove_it = std::find(old_chunk.begin(), old_chunk.end(), index);
 		if (remove_it == old_chunk.end())
 		{
 			LOG(INFO) << "Trying to move missing index " << index;

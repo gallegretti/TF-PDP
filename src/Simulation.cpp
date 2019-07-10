@@ -56,7 +56,7 @@ void Simulation::run()
 	{
 		for (int j = 0; j < 128; j++)
 		{
-			step(0.01f);
+			step(0.05f);
 		}
 	}
 	is_done = true;
@@ -136,18 +136,6 @@ void Simulation::update_states(float delta)
 			break;
 
 		case State::Splitting:
-			if (mass >= hunting_mass)
-			{
-				state.store(State::Hunting);
-				simulate_hunting(i);
-			}
-			else
-			{
-				state.store(State::Incubating);
-				simulate_incubating(i);
-			}
-			break;
-
 		case State::Dead:
 			break;
 
@@ -284,6 +272,13 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 		State dead = State::Dead;
 		if (states[i].compare_exchange_strong(dead, state))
 		{
+			{
+				std::unique_lock<std::mutex>(last_agent_index_mutex);
+				if (i > last_agent_index)
+				{
+					i = last_agent_index;
+				}
+			}
 			// Can't modify spatial index, other threads are reading it
 			// or have references to chunks
 			positions[i] = position;

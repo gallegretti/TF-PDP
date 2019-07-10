@@ -47,11 +47,12 @@ int main(int argc, char* argv[])
 
 	// Wait for simulation to end
 	simulation_thread.join();
+	LOG(INFO) << "Total time: " << clock.getElapsedTime().asMilliseconds() << "ms";
+
 	if (visualization.has_value())
 	{
 		visualization->join();
 	}
 
-	LOG(INFO) << "Total time: " << clock.getElapsedTime().asMilliseconds() << "ms";
 	return 0;
 }
