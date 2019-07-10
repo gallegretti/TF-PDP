@@ -32,7 +32,6 @@
 // Possible states for each agent
 enum class State {
 	Incubating,	// Standing still and gaining mass
-	Splitting,	// Splitting itself in two, each with half of it's mass
 	Hunting,	// Moving, trying to absorb other agents, spending mass
 	Dead		// Dead
 };
@@ -82,7 +81,7 @@ public:
 
 	// Constant map dimension size.
 	// Map goes from [-map_size, +map_size]
-	static constexpr float map_size = 1024;
+	static constexpr float map_size = 512;
 
 	// Threshold for an agent go back to incubating state.
 	static constexpr float incubating_mass = 1.0f;
@@ -94,7 +93,7 @@ public:
 	static constexpr float splitting_mass = 10.0f;
 
 	// Cost in mass for an agent to move.
-	static constexpr float move_mass_cost = 0.1f;
+	static constexpr float move_mass_cost = 0.01f;
 
 	// Reward in mass for an agent to incubate
 	static constexpr float incubate_mass_reward = 0.1f;

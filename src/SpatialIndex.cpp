@@ -23,16 +23,17 @@ void SpatialIndex::remove(size_t index, vec2f position)
 	int old_chunk_index = chunk_index(position);
 	auto& old_chunk = chunks.at(old_chunk_index);
 	auto remove_it = std::find(old_chunk.begin(), old_chunk.end(), index);
-	if (remove_it == old_chunk.end())
+	if (remove_it != old_chunk.end())
 	{
-		LOG(INFO) << "Trying to remove missing index " << index;
-		return;
+		old_chunk.erase(remove_it);
 	}
-	old_chunk.erase(remove_it);
+	return;
 }
 
 void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 {
+	std::scoped_lock(critial_region);
+
 	int old_chunk_index = chunk_index(old_position);
 	int new_chunk_index = chunk_index(new_position);
 
@@ -43,18 +44,17 @@ void SpatialIndex::moved(size_t index, vec2f old_position, vec2f new_position)
 	}
 
 	{
-		std::scoped_lock(critial_region);
-
 		// Remove from old chunk
 		auto& old_chunk = chunks.at(old_chunk_index);
 		auto remove_it = std::find(old_chunk.begin(), old_chunk.end(), index);
 		if (remove_it == old_chunk.end())
 		{
-			LOG(INFO) << "Trying to move missing index " << index;
+			// Must be new splitted agent, we should just assign it a new chunk
+			int new_chunk_index = chunk_index(new_position);
+			chunks.at(new_chunk_index).push_back(index);
 			return;
 		}
 		old_chunk.erase(remove_it);
-
 		// Add to new chunk
 		int new_chunk_index = chunk_index(new_position);
 		chunks.at(new_chunk_index).push_back(index);

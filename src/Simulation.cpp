@@ -135,7 +135,6 @@ void Simulation::update_states(float delta)
 			}
 			break;
 
-		case State::Splitting:
 		case State::Dead:
 			break;
 
@@ -176,7 +175,7 @@ inline void Simulation::simulate_hunting(size_t index)
 			closer_distance_squared = squared_distance;
 		}
 	}
-	
+
 	mass -= move_mass_cost;
 
 	// No target nearby
@@ -215,7 +214,7 @@ inline void Simulation::simulate_splitting(size_t index)
 	spawn_agent(
 		new_position,
 		mass,
-		State::Splitting);
+		State::Hunting);
 }
 
 void Simulation::update_positions(float delta)
@@ -255,14 +254,8 @@ void Simulation::update_positions(float delta)
 			// Update index
 			spatial_index.moved(i, old_position, position);
 		}
-		if (current_state == State::Splitting)
-		{
-			states[i].store(State::Hunting);
-			vec2f& position = positions[i];
-			spatial_index.set(i, position);
-		}
 	}
-	
+
 }
 
 int Simulation::spawn_agent(vec2f position, float mass, State state)
@@ -276,7 +269,7 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 				std::unique_lock<std::mutex>(last_agent_index_mutex);
 				if (i > last_agent_index)
 				{
-					i = last_agent_index;
+					last_agent_index = i;
 				}
 			}
 			// Can't modify spatial index, other threads are reading it
