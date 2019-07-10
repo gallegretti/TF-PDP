@@ -276,7 +276,7 @@ int Simulation::spawn_agent(vec2f position, float mass, State state)
 				std::unique_lock<std::mutex>(last_agent_index_mutex);
 				if (i > last_agent_index)
 				{
-					i = last_agent_index;
+					last_agent_index = i;
 				}
 			}
 			// Can't modify spatial index, other threads are reading it
